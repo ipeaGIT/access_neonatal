@@ -39,22 +39,49 @@ leitos_aop_cities <- leitos[.(code_muni6), on = c('codufmun')]
 
 # 3 read aop hospitals ----------------------------------------------------
 
-# CHECK IF THIS IS THE GOAL, I.E., ONLY SUS
+# read data and clean column names
 aop_hospitals <- readr::read_rds('//STORAGE6/usuarios/Proj_acess_oport/data/acesso_oport/hospitais/2018/hospitais_filter_geocoded_pmaq_2018.rds') %>% 
   janitor::clean_names()
 
 # filter aop hospitals
 leitos_aop_hosp <- leitos_aop_cities[.(aop_hospitals$cnes), on = c('cnes')]
 
-### OBS: DIFERENCA leitos_aop_cities e leitos_aop_hosp MUITO PEQUENA
-# VERIFICAR SE NAO TEM ALGUM ERRO, JA QUE aop_hosp NAO TEM HOSP PRIVADOS
-# DIFERENCA NAO DEVERIA SER MAIOR????
-
 
 # 4 filter beds by type ---------------------------------------------------
 
+# filter neonatal uti beds
+leitos <- subset(leitos_aop_hosp, codleito %in% c('80','81','82','92','93'))
 
-# 5 save data.table -------------------------------------------------------
+# columns to change type
+qt_cols <- c('qt_exist','qt_contr','qt_sus','qt_nsus')
+
+# change type of quantity of beds columns
+leitos[
+  , 
+  (qt_cols) := lapply(.SD, as.integer), 
+  .SDcols = qt_cols]
+
+# total number of beds by muni
+leitos[, .(qtd_exist = sum(qt_exist)), by = .(codufmun)]
+leitos[, .(qtd_sus = sum(qt_sus)), by = .(codufmun)]
+
+#
+cnes_leitos <- leitos[, .(qtd_sus = sum(qt_sus)), by = .(cnes)]
+sum(cnes_leitos$qtd_sus)
+
+
+
+# 5 check information competence ------------------------------------------
+
+# CHECAR SE PASSOS ABAIXO SAO NECESSARIOS
+
+# check types of competence
+leitos_aop_hosp %>% count(competen)
+
+# filter NA competence (? CHECAR SE PRECISA)
+leitos_aop_hosp_sem_na <- leitos_aop_hosp[!is.na(competen)]
+
+# 6 save data.table -------------------------------------------------------
 
 
 
