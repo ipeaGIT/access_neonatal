@@ -45,6 +45,9 @@ filter_cnes_beds <- function(){
   aop_hospitals <- readr::read_rds('//STORAGE6/usuarios/Proj_acess_oport/data/acesso_oport/hospitais/2018/hospitais_filter_geocoded_pmaq_2018.rds') %>% 
     janitor::clean_names()
   
+  # REMOVE LAT LON MISSING FROM HOSPITALS DATA 
+  # do this here until acess_oport project is updated (which will do this process)
+  
   # 2 filter data -----------------------------------------------------------
   
   
