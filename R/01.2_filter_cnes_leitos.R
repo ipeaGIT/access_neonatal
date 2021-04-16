@@ -16,7 +16,7 @@
 
 # setup -------------------------------------------------------------------
 
-source('./R/0_setup.R')
+source('./R/00_setup.R')
 
 
 # define function ---------------------------------------------------------
@@ -45,8 +45,22 @@ filter_cnes_beds <- function(){
   aop_hospitals <- readr::read_rds('//STORAGE6/usuarios/Proj_acess_oport/data/acesso_oport/hospitais/2018/hospitais_filter_geocoded_pmaq_2018.rds') %>% 
     janitor::clean_names()
   
-  # REMOVE LAT LON MISSING FROM HOSPITALS DATA 
+
+  # REMOVE LAT LON MISSING FROM HOSPITALS DATA  -----------------------------
   # do this here until acess_oport project is updated (which will do this process)
+  # remove lat lon missing
+  aop_hospitals <- aop_hospitals[!is.na(lat),] 
+  
+  # filter only estabs with high quality geocode
+  table(aop_hospitals$precision_depth)
+  
+  aop_hospitals <- aop_hospitals[(precision_depth %in% c('cnes','3 Estrelas', '4 Estrelas', 
+                                      'airport', 'amusement_park', 'PMAQ', 
+                                      'bus_station', 'establishment',
+                                      'intersection', 'neighborhood', 
+                                      'political', 'post_box', 'street_number',
+                                      'premise', 'subpremise',
+                                      'town_square', 'postal_code'))]
   
   # 2 filter data -----------------------------------------------------------
   
