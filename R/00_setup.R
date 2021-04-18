@@ -6,6 +6,7 @@ library(readxl)
 library(foreign)
 library(pbapply)
 library(janitor)
+library(sf)
 
 
 options(scipen=10000)

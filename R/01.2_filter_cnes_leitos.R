@@ -1,8 +1,9 @@
 
 # description -------------------------------------------------------------
 
-# this script adds to aop_hospitals data columns containing the number of
-# neonatal beds (total, sus, nsus).
+# this script adds the number of neonatal beds (total, sus, nsus) to
+# aop_hospitals data
+
 
 # steps:
 # 1. read raw data (aop_hospitals and hospitals beds data saved by script #1)
@@ -41,9 +42,15 @@ filter_cnes_beds <- function(){
   
   # * 1.2 read aop hospitals data -------------------------------------------
   
+  ########## CORRIGIR BASE A SER LIDA (ENDERECO E BASE ANTIGAS MUDARAM)
+  ########## MUDAR CAMINHO E CORRIGIR POSSIVEIS MODIFICACOES EM SEGUIDA
   # read data 
-  aop_hospitals <- readr::read_rds('//STORAGE6/usuarios/Proj_acess_oport/data/acesso_oport/hospitais/2018/hospitais_filter_geocoded_pmaq_2018.rds') %>% 
+  
+  aop_hospitals <- readr::read_rds('//STORAGE6/usuarios/Proj_acess_oport/data/acesso_oport/saude/2018/saude_2018_geocoded_filter.rds') %>% 
     janitor::clean_names()
+  
+  #aop_hospitals <- readr::read_rds('//STORAGE6/usuarios/Proj_acess_oport/data/acesso_oport/hospitais/2018/hospitais_filter_geocoded_pmaq_2018.rds') %>% 
+  #  janitor::clean_names()
   
 
   # REMOVE LAT LON MISSING FROM HOSPITALS DATA  -----------------------------
@@ -51,16 +58,19 @@ filter_cnes_beds <- function(){
   # remove lat lon missing
   aop_hospitals <- aop_hospitals[!is.na(lat),] 
   
+
+  # FILTER PRECISION DEPTH --------------------------------------------------
+  # POR ENQUANTO, LER DADOS FILTRADOS COM 
+  # 1. BOM PRECISION DEPTH
+  # 2. ROUTE COM CEP IGUAL NO SEARCHED E MATCHED ADDRESS
+  # processo filtro https://github.com/ipeaGIT/acesso_oport/blob/master/R/fun/filter_geocode.R
+  
+  ## MUDAR COM NOVO SOFTWARE DE GEORREFERENCIAMENTO (POIS IRA MELHORAR O
+  #... PROCESSO DE GEORREF E QUALIDADE DOS DADOS)
+  
   # filter only estabs with high quality geocode
   table(aop_hospitals$precision_depth)
   
-  aop_hospitals <- aop_hospitals[(precision_depth %in% c('cnes','3 Estrelas', '4 Estrelas', 
-                                      'airport', 'amusement_park', 'PMAQ', 
-                                      'bus_station', 'establishment',
-                                      'intersection', 'neighborhood', 
-                                      'political', 'post_box', 'street_number',
-                                      'premise', 'subpremise',
-                                      'town_square', 'postal_code'))]
   
   # 2 filter data -----------------------------------------------------------
   
@@ -96,6 +106,11 @@ filter_cnes_beds <- function(){
     nomatch = NULL
   ]
   
+  
+  
+  
+  # 3 create dt with number of beds by hospital -----------------------------
+  
   # columns to change type
   qt_cols <- c('qt_exist','qt_contr','qt_sus','qt_nsus')
   
@@ -107,15 +122,13 @@ filter_cnes_beds <- function(){
   ]
   
   # number of beds by muni
-  # sus sum
-  beds_neonatal[, .(qtd_sus = sum(qt_sus, na.rm = T))]
+  # sus sum -> run below to check
+  #beds_neonatal[, .(qtd_sus = sum(qt_sus, na.rm = T))]
   # total by muni
   #beds_neonatal[, .(qtd_exist = sum(qt_exist, na.rm = T)), by = .(codufmun)]
   # sus by muni
   #beds_neonatal[, .(qtd_sus = sum(qt_sus, na.rm = T)), by = .(codufmun)]
   
-  
-  # 3 create dt with number of beds by hospital -----------------------------
   
   # create dt with number of neonatal beds offered by each hospital by cnes
   #cnes_beds_sus <- beds_neonatal[, .(neonatal_beds_sus = sum(qt_sus)), by = .(cnes)]
